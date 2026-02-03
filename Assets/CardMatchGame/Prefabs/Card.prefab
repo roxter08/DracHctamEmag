@@ -381,6 +381,5 @@ MonoBehaviour:
   backImage: {fileID: 3134966337499522402}
   cardImageComponent: {fileID: 1242216663569746210}
   cardFlipAudio: {fileID: 8300000, guid: 468b0b4117c5eeb409f2c9a7f77683d1, type: 3}
-  flipDuration: 0.25
-  flashDuration: 1.8
-  cardImage: {fileID: 0}
+  flipDuration: 0.15
+  flashDuration: 1.3
