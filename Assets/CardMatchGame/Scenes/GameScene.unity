@@ -1204,6 +1204,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rows: 4
   columns: 3
+  cardFlashDuration: 1
   cardPrefab: {fileID: -2827531483387663152, guid: 11ba9bd8fcac0ae42bd08bdb593d9dd5, type: 3}
   cardImages:
   - {fileID: 21300000, guid: 8044b3204ec2bcd4e84706340513a909, type: 3}
