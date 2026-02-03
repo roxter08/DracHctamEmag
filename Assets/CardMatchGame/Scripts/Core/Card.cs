@@ -5,6 +5,12 @@ using UnityEngine.UI;
 
 namespace CardMatchGame
 {
+    public struct CardData
+    {
+        public int cardID;
+        public Sprite cardSprite;
+    }
+
     public class Card : MonoBehaviour
     {
         [SerializeField] private Image frontImage;
@@ -30,8 +36,11 @@ namespace CardMatchGame
             this.cardID = data.cardID;
             cardImage = data.cardSprite;
             cardImageComponent.sprite = cardImage;
+        }
 
-            //StartCoroutine(FlashForSeconds(flashDuration));
+        public void FlashOnce()
+        {
+            StartCoroutine(FlashForSeconds(flashDuration));
         }
 
         public void OnCardClicked()

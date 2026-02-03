@@ -38,7 +38,6 @@ namespace CardMatchGame
             data.turnsTaken = totalTurnsTaken;
 
             PlayerPrefs.SetString(SAVE_KEY, JsonUtility.ToJson(data));
-            Debug.Log("Game Saved");
             OnSaveCompleted.Invoke();
         }
 
@@ -47,20 +46,18 @@ namespace CardMatchGame
             saveData = null;
             if (!PlayerPrefs.HasKey(SAVE_KEY))
             {
-                Debug.Log("Save Key Not Found");
+                Debug.Log("No Save Game Data Found");
             }
             else
             {
                 saveData = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(SAVE_KEY));
                 OnLoadCompleted.Invoke(saveData);
-                Debug.Log("Game Loaded");
             }
             return saveData == null;
         }
 
         public void Clear()
         {
-            Debug.Log("Game Data Cleared");
             PlayerPrefs.DeleteKey(SAVE_KEY);
         }
     }

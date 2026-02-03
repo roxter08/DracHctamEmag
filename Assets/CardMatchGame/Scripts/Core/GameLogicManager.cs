@@ -19,8 +19,6 @@ namespace CardMatchGame
         }
         private void CheckWinLoseCondition()
         {
-            Debug.Log("TM:TP " + matchManager.TotalCardsMatched + " " + totalNumberOfPairs);
-            //totalCardsMatched++;
             if (matchManager.TotalCardsMatched == totalNumberOfPairs)
             {
                 IsGameComplete = true;

@@ -88,7 +88,6 @@ namespace CardMatchGame
         private void OnPersistantDataLoaded(SaveData obj)
         {
             totalCardsMatched = obj.totalMatches;
-            Debug.Log("Total matches "+obj.totalMatches);
         }
     }
 }

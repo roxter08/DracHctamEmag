@@ -61,8 +61,8 @@ namespace CardMatchGame
             if(saveData == null)
             {
                 List<CardData> dataSet = PickRandom(cardDataList, maxCount / 2);
-                dataSet.AddRange(dataSet); // Duplicate images for pairs
-                dataSet = Shuffle(dataSet); // Shuffle images
+                dataSet.AddRange(dataSet);
+                dataSet = Shuffle(dataSet);
                 for (int i = 0; i < maxCount; i++)
                 {
                     GameObject cardObject = GameObject.Instantiate(cardPrefab.gameObject, gridRoot.transform, false);
@@ -90,6 +90,15 @@ namespace CardMatchGame
                     }
                     CardsList.Add(card);
                     gameCallbacks.RaiseCardGeneratedEvent(card);
+                }
+            }
+
+            //Reveal all cards for the first time only
+            foreach (Card card in CardsList)
+            {
+                if(!card.IsMatched)
+                {
+                    card.FlashOnce();
                 }
             }
             

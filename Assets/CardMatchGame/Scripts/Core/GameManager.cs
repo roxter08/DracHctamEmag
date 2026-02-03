@@ -119,6 +119,7 @@ namespace CardMatchGame
             }
             gridManager.Initialize(saveData);
             viewController.AddListenerOnExitButtonClicked(ExitGame);
+            viewController.AddListenerOnRestartButtonClicked(SaveGameProgress);
             viewController.AddListenerOnRestartButtonClicked(RestartGame);
         }
 
@@ -140,7 +141,12 @@ namespace CardMatchGame
 
         private void OnApplicationQuit()
         {
-            if(gameLogicManager.IsGameComplete)
+           SaveGameProgress();
+        }
+
+        private void SaveGameProgress()
+        {
+            if (gameLogicManager.IsGameComplete)
             {
                 SaveLoadManager.Instance.Clear();
             }
@@ -149,11 +155,5 @@ namespace CardMatchGame
                 SaveLoadManager.Instance.SaveGame(gridManager.CardsList, gridManager.Rows, gridManager.Columns, scoreController.GetScore(), scoreController.GetTurnsTaken(), matchManager.TotalCardsMatched);
             }
         }
-    }
-
-    public struct CardData
-    {
-        public int cardID;
-        public Sprite cardSprite;
     }
 }
