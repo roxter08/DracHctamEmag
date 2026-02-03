@@ -29,7 +29,7 @@ namespace CardMatchGame
             foreach (var card in cards)
             {
                 CardInfo cardInfo = new CardInfo();
-                cardInfo.ID = card.cardID;
+                cardInfo.ID = card.CardID;
                 cardInfo.IsMatched = card.IsMatched;
                 data.cardInfoList.Add(cardInfo);
             }

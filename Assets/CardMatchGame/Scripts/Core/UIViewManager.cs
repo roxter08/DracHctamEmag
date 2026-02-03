@@ -22,7 +22,7 @@ namespace CardMatchGame
             scoreText = uiRootTransform.Find("GameHUD/ScoreBoard/ScoreInfo/Score").GetComponent<TextMeshProUGUI>();
             turnText = uiRootTransform.Find("GameHUD/ScoreBoard/TurnsInfo/Turns").GetComponent<TextMeshProUGUI>();
             exitGameButton = uiRootTransform.Find("GameHUD/MenuButtons/ExitButton").GetComponent<Button>();
-            restartGameButton = uiRootTransform.Find("GameHUD/MenuButtons/RestartButton").GetComponent<Button>();
+            restartGameButton = uiRootTransform.Find("GameHUD/MenuButtons/ResetButton").GetComponent<Button>();
 
             gameCompletionTitle.SetActive(false);
         }
@@ -31,7 +31,7 @@ namespace CardMatchGame
         {
             exitGameButton.onClick.AddListener(() => action.Invoke());
         }
-        public void AddListenerOnRestartButtonClicked(Action action)
+        public void AddListenerOnResetButtonClicked(Action action)
         {
             restartGameButton.onClick.AddListener(() => action.Invoke());
         }

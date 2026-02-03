@@ -13,6 +13,7 @@ namespace CardMatchGame
         [Header("GAME DATA")]
         [SerializeField] int rows;
         [SerializeField] int columns;
+        [SerializeField] private float cardFlashDuration = 2f;
         [SerializeField] Card cardPrefab; 
         [SerializeField] List<Sprite> cardImages; 
 
@@ -67,7 +68,7 @@ namespace CardMatchGame
             int totalNumberOfPairs = (int)(rows * columns * 0.5f);
 
             gameCallbacks = new GameCallbacks();
-            gridManager = new GridManager(gridRoot, rows, columns, cardDataSet, cardPrefab, gameCallbacks);
+            gridManager = new GridManager(gridRoot, rows, columns, cardFlashDuration, cardDataSet, cardPrefab, gameCallbacks);
             matchManager = new MatchManager(matchedAudio, mismatchedAudio, gameCallbacks);
             gameLogicManager = new GameLogicManager(totalNumberOfPairs, gameOverAudio, matchManager, gameCallbacks);
             scoreController = new ScoreManager(10, gameCallbacks);
@@ -119,8 +120,7 @@ namespace CardMatchGame
             }
             gridManager.Initialize(saveData);
             viewController.AddListenerOnExitButtonClicked(ExitGame);
-            viewController.AddListenerOnRestartButtonClicked(SaveGameProgress);
-            viewController.AddListenerOnRestartButtonClicked(RestartGame);
+            viewController.AddListenerOnResetButtonClicked(ResetGame);
         }
 
         private void Update()
@@ -133,9 +133,10 @@ namespace CardMatchGame
             //Exit Game
             Application.Quit();
         }
-        private void RestartGame()
+        private void ResetGame()
         {
             //Reload Level
+            SaveLoadManager.Instance.Clear();
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 

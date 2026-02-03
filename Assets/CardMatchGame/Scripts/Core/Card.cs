@@ -13,34 +13,33 @@ namespace CardMatchGame
 
     public class Card : MonoBehaviour
     {
+        private const float COLOR_FADE_OFFSET = 0.7f;
         [SerializeField] private Image frontImage;
         [SerializeField] private Image backImage;
         [SerializeField] private Image cardImageComponent;
         [SerializeField] private AudioClip cardFlipAudio;
-        [SerializeField] private float flipDuration = 0.25f;
-        [SerializeField] private float flashDuration = 2f;
+        [SerializeField] private float flipDuration = 0.15f;
 
-
-        [HideInInspector]
-        public Sprite cardImage;
-        public int cardID;
 
         private bool isRevealed = false;
-        public bool IsFaceUp { get; private set; }
+        
+        public Sprite CardSprite { get; private set; }
+        public int CardID { get; private set; }
+
         public bool IsMatched { get; private set; }
 
         public Action<Card> OnCardFlipped;
 
         public void Initialize(CardData data)
         {
-            this.cardID = data.cardID;
-            cardImage = data.cardSprite;
-            cardImageComponent.sprite = cardImage;
+            CardID = data.cardID;
+            CardSprite = data.cardSprite;
+            cardImageComponent.sprite = CardSprite;
         }
 
-        public void FlashOnce()
+        public void FlashOnce(float delayInSeconds)
         {
-            StartCoroutine(FlashForSeconds(flashDuration));
+           StartCoroutine(FlashForSeconds(delayInSeconds));
         }
 
         public void OnCardClicked()
@@ -53,7 +52,7 @@ namespace CardMatchGame
 
         public void RevealCard()
         {
-            cardImageComponent.sprite = cardImage;
+            cardImageComponent.sprite = CardSprite;
             isRevealed = true;
         }
 
@@ -67,6 +66,7 @@ namespace CardMatchGame
         {
             // Add logic for matched cards (e.g., disable further interaction)
             IsMatched = true;
+            FadeCardColor();
             SetInteractable(false);
         }
 
@@ -88,12 +88,9 @@ namespace CardMatchGame
 
         IEnumerator FlipRoutine(bool faceUp, Action<bool> OnFlipComplete)
         {
-            IsFaceUp = faceUp;
-            //AudioManager.Instance.PlaySound(SoundType.Flip);
-
             yield return Rotate(0, 90);
             frontImage.gameObject.SetActive(faceUp);
-            cardImageComponent.sprite = cardImage;
+            cardImageComponent.sprite = CardSprite;
             backImage.gameObject.SetActive(!faceUp);
             yield return Rotate(90, 0);
 
@@ -138,14 +135,16 @@ namespace CardMatchGame
 
         public IEnumerator FlashForSeconds(float waitTime)
         {
-            Flip();
+            frontImage.gameObject.SetActive(true);
+            backImage.gameObject.SetActive(false);
+            SetInteractable(false);
             yield return new WaitForSeconds(waitTime);
             FlipBack();
+            SetInteractable(true);
         }
 
         public void SetFaceDownInstant()
         {
-            IsFaceUp = false;
             IsMatched = false;
             frontImage.gameObject.SetActive(false);
             backImage.gameObject.SetActive(true);
@@ -153,10 +152,14 @@ namespace CardMatchGame
 
         public void SetMatchedInstant()
         {
-            IsFaceUp = true;
             frontImage.gameObject.SetActive(true);
             backImage.gameObject.SetActive(false);
             MatchFound();
+        }
+
+        private void FadeCardColor()
+        {
+            cardImageComponent.color = cardImageComponent.color * COLOR_FADE_OFFSET;
         }
     }
 }

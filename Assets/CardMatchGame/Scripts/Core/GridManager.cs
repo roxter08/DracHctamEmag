@@ -16,11 +16,13 @@ namespace CardMatchGame
 
         private GameCallbacks gameCallbacks;
 
+        private float cardFlashDuration;
+        
         public List<Card> CardsList { get; private set; }
         public int Rows => rows;
         public int Columns => columns;  
 
-        public GridManager(GridLayoutGroup gridLayout, int rows, int columns, List<CardData> cardDataList, Card cardPrefab, GameCallbacks gameCallbacks)
+        public GridManager(GridLayoutGroup gridLayout, int rows, int columns, float cardFlashDuration, List<CardData> cardDataList, Card cardPrefab, GameCallbacks gameCallbacks)
         {
             this.rows = rows;
             this.columns = columns;
@@ -29,6 +31,7 @@ namespace CardMatchGame
             this.cardPrefab = cardPrefab;
             this.gameCallbacks = gameCallbacks;
             CardsList = new List<Card>();
+            this.cardFlashDuration = cardFlashDuration;
         }
 
         public void Initialize(SaveData saveData = null)
@@ -52,13 +55,14 @@ namespace CardMatchGame
             }
 
             InitializeCards(saveData);
+            FlashAllCardsOnStart();
         }
 
         private void InitializeCards(SaveData saveData)
         {
             int maxCount = rows * columns;
 
-            if(saveData == null)
+            if (saveData == null)
             {
                 List<CardData> dataSet = PickRandom(cardDataList, maxCount / 2);
                 dataSet.AddRange(dataSet);
@@ -68,7 +72,7 @@ namespace CardMatchGame
                     GameObject cardObject = GameObject.Instantiate(cardPrefab.gameObject, gridRoot.transform, false);
                     Card card = cardObject.GetComponent<Card>();
                     card.Initialize(dataSet[i]);
-                    CardsList.Add(card);    
+                    CardsList.Add(card);
                     gameCallbacks.RaiseCardGeneratedEvent(card);
                 }
             }
@@ -80,7 +84,7 @@ namespace CardMatchGame
                     Card card = cardObject.GetComponent<Card>();
                     CardData savedCardData = cardDataList.Find(c => c.cardID == saveData.cardInfoList[i].ID);
                     card.Initialize(savedCardData);
-                    if(saveData.cardInfoList[i].IsMatched)
+                    if (saveData.cardInfoList[i].IsMatched)
                     {
                         card.SetMatchedInstant();
                     }
@@ -92,16 +96,18 @@ namespace CardMatchGame
                     gameCallbacks.RaiseCardGeneratedEvent(card);
                 }
             }
+        }
 
+        private void FlashAllCardsOnStart()
+        {
             //Reveal all cards for the first time only
             foreach (Card card in CardsList)
             {
-                if(!card.IsMatched)
+                if (!card.IsMatched)
                 {
-                    card.FlashOnce();
+                    card.FlashOnce(cardFlashDuration);
                 }
             }
-            
         }
 
         List<CardData> Shuffle(List<CardData> list)

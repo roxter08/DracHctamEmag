@@ -21,8 +21,8 @@ namespace CardMatchGame
 
         public async Task CheckForMatch(Action<CardMatchHandler> OnComplete)
         {
-            await Task.Delay(500);
-            if (FirstCard.cardImage == SecondCard.cardImage)
+            await Task.Delay(100);
+            if (FirstCard.CardID == SecondCard.CardID)
             {
                 FirstCard.MatchFound();
                 SecondCard.MatchFound();
@@ -32,8 +32,6 @@ namespace CardMatchGame
             {
                 FirstCard.FlipBack();
                 SecondCard.FlipBack();
-                //FirstCard.HideCard();
-                //SecondCard.HideCard();
                 HasMatched = false;
             }
 
