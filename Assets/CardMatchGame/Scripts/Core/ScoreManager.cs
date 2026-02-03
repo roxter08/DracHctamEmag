@@ -1,3 +1,5 @@
+using System;
+
 namespace CardMatchGame
 {
     public class ScoreManager : IEventListener
@@ -18,12 +20,15 @@ namespace CardMatchGame
             GameCallbacks.OnMatchFound += UpdateScore;
             GameCallbacks.OnMatchFound += UpdateTurns;
             GameCallbacks.OnMismatchFound += UpdateTurns;
+            SaveLoadManager.Instance.OnLoadCompleted += SetLastSavedRecords;
         }
+
         public void RemoveListener()
         {
             GameCallbacks.OnMatchFound -= UpdateScore;
             GameCallbacks.OnMatchFound -= UpdateTurns;
             GameCallbacks.OnMismatchFound -= UpdateTurns;
+            SaveLoadManager.Instance.OnLoadCompleted -= SetLastSavedRecords;
         }
 
         public int GetScore()
@@ -48,6 +53,14 @@ namespace CardMatchGame
         public void UpdateTurns()
         {
             turns++;
+            gameCallbacks.RaiseTurnUpdateEvent(turns);
+        }
+
+        private void SetLastSavedRecords(SaveData obj)
+        {
+            score = obj.score;
+            turns = obj.turnsTaken;
+            gameCallbacks.RaiseScoreUpdatedEvent(score);
             gameCallbacks.RaiseTurnUpdateEvent(turns);
         }
     }

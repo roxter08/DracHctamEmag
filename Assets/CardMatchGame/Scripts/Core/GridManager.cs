@@ -11,24 +11,35 @@ namespace CardMatchGame
         private int rows;
         private int columns;
 
-        private List<Sprite> cardImages; 
+        private List<CardData> cardDataList; 
         private Card cardPrefab; 
 
         private GameCallbacks gameCallbacks;
 
-        public GridManager(GridLayoutGroup gridLayout, int rows, int columns, List<Sprite> cardImages, Card cardPrefab, GameCallbacks gameCallbacks)
+        public List<Card> CardsList { get; private set; }
+        public int Rows => rows;
+        public int Columns => columns;  
+
+        public GridManager(GridLayoutGroup gridLayout, int rows, int columns, List<CardData> cardDataList, Card cardPrefab, GameCallbacks gameCallbacks)
         {
             this.rows = rows;
             this.columns = columns;
             this.gridRoot = gridLayout;
-            this.cardImages = cardImages;
+            this.cardDataList = cardDataList;
             this.cardPrefab = cardPrefab;
             this.gameCallbacks = gameCallbacks;
+            CardsList = new List<Card>();
         }
 
-        public void Initialize()
+        public void Initialize(SaveData saveData = null)
         {
             RectTransform gridRectTransform = gridRoot.transform as RectTransform;
+            if(saveData != null) 
+            {
+                rows = saveData.rows;
+                columns = saveData.columns;
+            }
+
             if (rows > columns)
             {
                 gridRoot.cellSize = new Vector3(gridRectTransform.rect.width / columns, gridRectTransform.rect.height / rows, 0);
@@ -40,40 +51,65 @@ namespace CardMatchGame
                 gridRoot.constraintCount = rows;
             }
 
-            InitializeCards();
+            InitializeCards(saveData);
         }
 
-        private void InitializeCards()
+        private void InitializeCards(SaveData saveData)
         {
             int maxCount = rows * columns;
-            List<Sprite> images = PickRandom(cardImages, maxCount / 2);
-            images.AddRange(images); // Duplicate images for pairs
-            images = Shuffle(images); // Shuffle images
-            List<Card> cards = new();
-            for (int i = 0; i < maxCount; i++)
+
+            if(saveData == null)
             {
-                GameObject cardObject = GameObject.Instantiate(cardPrefab.gameObject, gridRoot.transform, false);
-                Card card = cardObject.GetComponent<Card>();
-                card.Initialize(images[i]);
-                gameCallbacks.RaiseCardGeneratedEvent(card);
+                List<CardData> dataSet = PickRandom(cardDataList, maxCount / 2);
+                dataSet.AddRange(dataSet); // Duplicate images for pairs
+                dataSet = Shuffle(dataSet); // Shuffle images
+                for (int i = 0; i < maxCount; i++)
+                {
+                    GameObject cardObject = GameObject.Instantiate(cardPrefab.gameObject, gridRoot.transform, false);
+                    Card card = cardObject.GetComponent<Card>();
+                    card.Initialize(dataSet[i]);
+                    CardsList.Add(card);    
+                    gameCallbacks.RaiseCardGeneratedEvent(card);
+                }
             }
+            else
+            {
+                for (int i = 0; i < maxCount; i++)
+                {
+                    GameObject cardObject = GameObject.Instantiate(cardPrefab.gameObject, gridRoot.transform, false);
+                    Card card = cardObject.GetComponent<Card>();
+                    CardData savedCardData = cardDataList.Find(c => c.cardID == saveData.cardInfoList[i].ID);
+                    card.Initialize(savedCardData);
+                    if(saveData.cardInfoList[i].IsMatched)
+                    {
+                        card.SetMatchedInstant();
+                    }
+                    else
+                    {
+                        card.SetFaceDownInstant();
+                    }
+                    CardsList.Add(card);
+                    gameCallbacks.RaiseCardGeneratedEvent(card);
+                }
+            }
+            
         }
 
-        List<Sprite> Shuffle(List<Sprite> list)
+        List<CardData> Shuffle(List<CardData> list)
         {
             for (int i = list.Count - 1; i > 0; i--)//
             {
                 int randomIndex = Random.Range(0, i + 1);
-                Sprite temp = list[i];
+                CardData temp = list[i];
                 list[i] = list[randomIndex];
                 list[randomIndex] = temp;
             }
             return list;
         }
 
-        List<Sprite> PickRandom(List<Sprite> list, int maxCount)
+        List<CardData> PickRandom(List<CardData> list, int maxCount)
         {
-            List<Sprite> result = new();
+            List<CardData> result = new();
             for (int i = 0; i < maxCount; i++)//
             {
                 int randomIndex = Random.Range(0, list.Count);

@@ -4,21 +4,26 @@ namespace CardMatchGame
 {
     public class GameLogicManager : IEventListener
     {
-        private int totalCardsMatched;
         private int totalNumberOfPairs;
         public GameCallbacks gameCallbacks;
         private AudioClip gameOverAudioClip;
-        public GameLogicManager(int numberOfCardPairs, AudioClip gameOverAudio, GameCallbacks gameCallbacks)
+        private MatchManager matchManager;
+
+        public bool IsGameComplete { get; private set; }
+        public GameLogicManager(int numberOfCardPairs, AudioClip gameOverAudio, MatchManager matchManager, GameCallbacks gameCallbacks)
         {
+            this.matchManager = matchManager;
             totalNumberOfPairs = numberOfCardPairs;
             this.gameCallbacks = gameCallbacks;
             this.gameOverAudioClip = gameOverAudio;
         }
         private void CheckWinLoseCondition()
         {
-            totalCardsMatched++;
-            if (totalCardsMatched == totalNumberOfPairs)
+            Debug.Log("TM:TP " + matchManager.TotalCardsMatched + " " + totalNumberOfPairs);
+            //totalCardsMatched++;
+            if (matchManager.TotalCardsMatched == totalNumberOfPairs)
             {
+                IsGameComplete = true;
                 gameCallbacks.RaiseGameCompletionEvent();
                 SoundManager.GetInstance().PlayAudio(gameOverAudioClip);
             }
@@ -27,6 +32,7 @@ namespace CardMatchGame
         public void AddListener()
         {
             GameCallbacks.OnMatchFound += CheckWinLoseCondition;
+
         }
 
         public void RemoveListener()

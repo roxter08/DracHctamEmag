@@ -32,12 +32,14 @@ namespace CardMatchGame
         [SerializeField] AudioClip mismatchedAudio;
         [SerializeField] AudioClip gameOverAudio;
 
+        private List<CardData> cardDataSet;
         private GridManager gridManager;
         private MatchManager matchManager;
         private GameLogicManager gameLogicManager;
         private ScoreManager scoreController;
         private UIViewManager viewController;
         private GameCallbacks gameCallbacks;
+        private SaveData saveData;
 
         private void OnValidate()
         {
@@ -59,20 +61,41 @@ namespace CardMatchGame
 
         private void Awake()
         {
+            cardDataSet = CreateDataSetFromImages(cardImages);
+
             ValidateProperCardCount();
             int totalNumberOfPairs = (int)(rows * columns * 0.5f);
 
             gameCallbacks = new GameCallbacks();
-            gridManager = new GridManager(gridRoot, rows, columns, cardImages, cardPrefab, gameCallbacks);
+            gridManager = new GridManager(gridRoot, rows, columns, cardDataSet, cardPrefab, gameCallbacks);
             matchManager = new MatchManager(matchedAudio, mismatchedAudio, gameCallbacks);
-            gameLogicManager = new GameLogicManager(totalNumberOfPairs, gameOverAudio, gameCallbacks);
+            gameLogicManager = new GameLogicManager(totalNumberOfPairs, gameOverAudio, matchManager, gameCallbacks);
             scoreController = new ScoreManager(10, gameCallbacks);
             viewController = new UIViewManager(uiRootTransform);
             SoundManager.GetInstance().Initialize(audioSources);
         }
 
+        
+
+        //Put it inside cards manager
+        private List<CardData> CreateDataSetFromImages(List<Sprite> images)
+        {
+            cardDataSet = new List<CardData>(images.Count);
+            for (int i = 0; i < images.Count; i++)
+            {
+                int index = i;
+                cardDataSet.Add(new CardData()
+                {
+                    cardID = index,
+                    cardSprite = cardImages[i]
+                });
+            }
+            return cardDataSet;
+        }
+
         private void OnEnable()
         {
+            matchManager.AddListener();
             gameLogicManager.AddListener();
             scoreController.AddListener();
             viewController.AddListener();
@@ -81,6 +104,7 @@ namespace CardMatchGame
 
         private void OnDisable()
         {
+            matchManager.RemoveListener();
             gameLogicManager.RemoveListener();
             scoreController.RemoveListener();
             viewController.RemoveListener();
@@ -89,11 +113,19 @@ namespace CardMatchGame
 
         private void Start()
         {
-            gridManager.Initialize();
+            if (SaveLoadManager.Instance.LoadGame(out SaveData saveData))
+            {
+                this.saveData = saveData;
+            }
+            gridManager.Initialize(saveData);
             viewController.AddListenerOnExitButtonClicked(ExitGame);
             viewController.AddListenerOnRestartButtonClicked(RestartGame);
         }
 
+        private void Update()
+        {
+            matchManager.CheckForMatch();
+        }
 
         private void ExitGame()
         {
@@ -106,9 +138,22 @@ namespace CardMatchGame
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
-        private void Update()
+        private void OnApplicationQuit()
         {
-            matchManager.CheckForMatch();
+            if(gameLogicManager.IsGameComplete)
+            {
+                SaveLoadManager.Instance.Clear();
+            }
+            else
+            {
+                SaveLoadManager.Instance.SaveGame(gridManager.CardsList, gridManager.Rows, gridManager.Columns, scoreController.GetScore(), scoreController.GetTurnsTaken(), matchManager.TotalCardsMatched);
+            }
         }
+    }
+
+    public struct CardData
+    {
+        public int cardID;
+        public Sprite cardSprite;
     }
 }

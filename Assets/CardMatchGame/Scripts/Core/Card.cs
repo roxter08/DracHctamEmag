@@ -14,8 +14,10 @@ namespace CardMatchGame
         [SerializeField] private float flipDuration = 0.25f;
         [SerializeField] private float flashDuration = 2f;
 
+
         [HideInInspector]
         public Sprite cardImage;
+        public int cardID;
 
         private bool isRevealed = false;
         public bool IsFaceUp { get; private set; }
@@ -23,12 +25,13 @@ namespace CardMatchGame
 
         public Action<Card> OnCardFlipped;
 
-        public void Initialize(Sprite image)
+        public void Initialize(CardData data)
         {
-            cardImage = image;
-            cardImageComponent.sprite = frontImage.sprite;
+            this.cardID = data.cardID;
+            cardImage = data.cardSprite;
+            cardImageComponent.sprite = cardImage;
 
-            StartCoroutine(FlashForSeconds(flashDuration));
+            //StartCoroutine(FlashForSeconds(flashDuration));
         }
 
         public void OnCardClicked()
@@ -54,7 +57,13 @@ namespace CardMatchGame
         public void MatchFound()
         {
             // Add logic for matched cards (e.g., disable further interaction)
-            GetComponent<Button>().interactable = false;
+            IsMatched = true;
+            SetInteractable(false);
+        }
+
+        private void SetInteractable(bool value)
+        {
+            GetComponent<Button>().interactable = value;
         }
 
         public void Flip(Action<bool> OnComplete = null)
@@ -66,11 +75,6 @@ namespace CardMatchGame
         {
             if (IsMatched) return;
             StartCoroutine(FlipRoutine(false, TriggerOnCardFlippedEvent));
-        }
-
-        public void SetMatched()
-        {
-            IsMatched = true;
         }
 
         IEnumerator FlipRoutine(bool faceUp, Action<bool> OnFlipComplete)
@@ -128,6 +132,22 @@ namespace CardMatchGame
             Flip();
             yield return new WaitForSeconds(waitTime);
             FlipBack();
+        }
+
+        public void SetFaceDownInstant()
+        {
+            IsFaceUp = false;
+            IsMatched = false;
+            frontImage.gameObject.SetActive(false);
+            backImage.gameObject.SetActive(true);
+        }
+
+        public void SetMatchedInstant()
+        {
+            IsFaceUp = true;
+            frontImage.gameObject.SetActive(true);
+            backImage.gameObject.SetActive(false);
+            MatchFound();
         }
     }
 }

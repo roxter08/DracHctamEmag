@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,8 +6,9 @@ using UnityEngine.UI;
 
 namespace CardMatchGame
 {
-    public class MatchManager
+    public class MatchManager : IEventListener
     {
+        private int totalCardsMatched;
         private Card firstSelectedCard;
         private Card secondSelectedCard;
         private Queue<CardMatchHandler> cardMatchHandlerQueue;
@@ -15,6 +17,8 @@ namespace CardMatchGame
         //Audio
         private AudioClip matchAudioClip;
         private AudioClip mismatchAudioClip;
+
+        public int TotalCardsMatched => totalCardsMatched;
 
         public MatchManager(AudioClip matchAudio, AudioClip misMatchAudio, GameCallbacks gameCallbacks)
         {
@@ -29,7 +33,7 @@ namespace CardMatchGame
             card.OnCardFlipped += CardSelected;
         }
 
-        public void CardSelected(Card selectedCard)
+        private void CardSelected(Card selectedCard)
         {
             if (firstSelectedCard == null)
             {
@@ -58,6 +62,7 @@ namespace CardMatchGame
                 {
                     if(value.HasMatched)
                     {
+                        totalCardsMatched++;
                         gameCallbacks.RaiseMatchFoundEvent();
                         SoundManager.GetInstance().PlayAudio(matchAudioClip);
                     }
@@ -68,6 +73,22 @@ namespace CardMatchGame
                     }
                 });
             }
+        }
+
+        public void AddListener()
+        {
+            SaveLoadManager.Instance.OnLoadCompleted += OnPersistantDataLoaded;
+        }
+
+        public void RemoveListener()
+        {
+            SaveLoadManager.Instance.OnLoadCompleted -= OnPersistantDataLoaded;
+        }
+
+        private void OnPersistantDataLoaded(SaveData obj)
+        {
+            totalCardsMatched = obj.totalMatches;
+            Debug.Log("Total matches "+obj.totalMatches);
         }
     }
 }
